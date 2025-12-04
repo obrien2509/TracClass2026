@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#208091">
+    <meta name="description" content="Class and Attendance Tracker - Manage classes, track student attendance, and generate reports">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ClassTracker">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23208091' width='180' height='180'/><text x='50%' y='50%' font-size='80' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>CT</text></svg>">
+    <title>Class &amp; Attendance Tracker</title>
+    <style>
+        :root {
+            --color-primary: #208091;
+            --color-primary-hover: #1a6775;
+            --color-primary-active: #1a5f6a;
+            --color-secondary: #5e5240;
+            --color-success: #2d9a8e;
+            --color-warning: #a84b2f;
+            --color-error: #c0152f;
+            --color-bg: #fcfcf9;
+            --color-surface: #ffffff;
+            --color-text: #134252;
+            --color-text-secondary: #626c71;
+            --color-border: #ede8e0;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --radius-base: 8px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+        }
+
+        .header {
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--space-16) var(--space-20);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--color-primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-20);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: var(--space-8);
+            margin-bottom: var(--space-20);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .nav-tabs button {
+            padding: var(--space-12) var(--space-16);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs button.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .nav-tabs button:hover {
+            color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            padding: var(--space-20);
+            margin-bottom: var(--space-16);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-16);
+            padding-bottom: var(--space-12);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--color-primary);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-16);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-8);
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--color-text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--space-8) var(--space-12);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-family: var(--font-family);
+            font-size: 14px;
+            color: var(--color-text);
+            background-color: var(--color-surface);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-16);
+        }
+
+        .btn {
+            padding: var(--space-8) var(--space-16);
+            border: none;
+            border-radius: var(--radius-base);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+
+        .btn-small {
+            padding: var(--space-4) var(--space-12);
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background-color: var(--color-error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #a01125;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: var(--space-16);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #f5f5f5;
+            color: var(--color-text);
+            padding: var(--space-12);
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        table td {
+            padding: var(--space-12);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        table tr:hover {
+            background-color: #fafafa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: rgba(45, 154, 142, 0.1);
+            color: var(--color-success);
+        }
+
+        .badge-warning {
+            background-color: rgba(168, 75, 47, 0.1);
+            color: var(--color-warning);
+        }
+
+        .badge-error {
+            background-color: rgba(192, 21, 47, 0.1);
+            color: var(--color-error);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--color-surface);
+            border-radius: var(--radius-base);
+            padding: var(--space-20);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-16);
+            padding-bottom: var(--space-12);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--color-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-8);
+            flex-wrap: wrap;
+            margin-top: var(--space-20);
+        }
+
+        .days-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-8);
+        }
+
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            padding: var(--space-8) var(--space-12);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day-checkbox input[type="checkbox"] {
+            margin-right: var(--space-8);
+            cursor: pointer;
+        }
+
+        .day-checkbox:hover {
+            background-color: #f9f9f9;
+        }
+
+        .day-checkbox.selected {
+            background-color: rgba(32, 128, 145, 0.1);
+            border-color: var(--color-primary);
+        }
+
+        .progress-card {
+            background: linear-gradient(135deg, rgba(32, 128, 145, 0.1) 0%, rgba(32, 128, 145, 0.05) 100%);
+            border-left: 4px solid var(--color-primary);
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--space-16);
+        }
+
+        .progress-bar-container {
+            background-color: #e0e0e0;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: var(--space-12) 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-success), var(--color-primary));
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: var(--space-16);
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: var(--space-8);
+            font-weight: 600;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-size: 10px;
+            background-color: #fafafa;
+            position: relative;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+
+        .calendar-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+        }
+
+        .calendar-dot.success {
+            background-color: var(--color-success);
+        }
+
+        .calendar-dot.warning {
+            background-color: var(--color-warning);
+        }
+
+        .calendar-dot.info {
+            background-color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .progress-card {
+                padding: var(--space-12);
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table th,
+            table td {
+                padding: var(--space-8);
+            }
+
+            .nav-tabs {
+                gap: var(--space-4);
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .nav-tabs button {
+                padding: var(--space-8) var(--space-12);
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            .container {
+                padding: var(--space-12);
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 95vh;
+            }
+
+            .card {
+                padding: var(--space-12);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Class &amp; Attendance Tracker</h1>
+    </div>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+            <button class="nav-btn" data-tab="schedule">Schedule</button>
+            <button class="nav-btn" data-tab="attendance">Attendance</button>
+            <button class="nav-btn" data-tab="reports">Reports</button>
+            <button class="nav-btn" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>📊 Semester Progress Dashboard</h2>
+                </div>
+                <div id="dashboardContent">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-20); margin-top: var(--space-20);">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Course Overview</h2>
+                    </div>
+                    <div id="courseOverview">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📅 Calendar View</h2>
+                    </div>
+                    <div id="calendarView" style="font-size: 12px;">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div id="schedule" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Add New Class</h2>
+                    <button class="btn btn-primary btn-small" onclick="openAddClassModal()">+ Add Class</button>
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 13px;">Add courses with multiple class days. Each day will appear as a separate row with independent status tracking.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Class Schedule &amp; Status</h2>
+                </div>
+
+                <div id="scheduleTable">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Mark Attendance</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="attendanceClass">Select Class:</label>
+                    <select id="attendanceClass" onchange="loadStudentsForAttendance()">
+                        <option value="">-- Select a Class --</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-secondary" onclick="openUploadStudentModal()">Upload Student List</button>
+
+                <div id="attendanceContent" style="margin-top: var(--space-16);">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Generate Reports</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="reportSemester">Select Semester:</label>
+                    <select id="reportSemester">
+                        <option value="">-- Select Semester --</option>
+                        <option value="jan-may">January - May</option>
+                        <option value="jun-jul">June - July</option>
+                        <option value="aug-dec">August - December</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="generatePDFReport()">Generate PDF Report</button>
+                <button class="btn btn-secondary" onclick="exportToGoogleDrive()">Sync to Google Drive</button>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>System Settings</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailNotifications">Email for Notifications:</label>
+                    <input type="email" id="emailNotifications" placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="googleDriveFolder">Google Drive Folder ID (optional):</label>
+                    <input type="text" id="googleDriveFolder" placeholder="Paste your folder ID here">
+                </div>
+
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                <button class="btn btn-secondary" onclick="downloadDataBackup()">Download Data Backup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Class Modal -->
+    <div id="addClassModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Class</h2>
+                <button class="modal-close" onclick="closeModal('addClassModal')">&times;</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="courseCode">Course Code:</label>
+                    <input type="text" id="courseCode" placeholder="e.g., TSLB1094">
+                </div>
+                <div class="form-group">
+                    <label for="courseName">Course Name:</label>
+                    <input type="text" id="courseName" placeholder="e.g., Academic Writing">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="className">Class Name/Group:</label>
+                <input type="text" id="className" placeholder="e.g., Group A, Lecture 01">
+            </div>
+
+            <div class="form-group">
+                <label for="classVenue">Venue:</label>
+                <input type="text" id="classVenue" placeholder="e.g., Room 101">
+            </div>
+
+            <div class="form-group">
+                <label>Days of Class (Max 2):</label>
+                <div class="days-selector" id="daysSelector">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startTime">Start Time:</label>
+                    <input type="time" id="startTime">
+                </div>
+                <div class="form-group">
+                    <label for="endTime">End Time:</label>
+                    <input type="time" id="endTime">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="semesterHours">Total Semester Hours:</label>
+                <input type="number" id="semesterHours" placeholder="e.g., 42" min="1">
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="saveClass()">Save Class</button>
+                <button class="btn btn-secondary" onclick="closeModal('addClassModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Status Modal -->
+    <div id="classStatusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Class Status</h2>
+                <button class="modal-close" onclick="closeModal('classStatusModal')">&times;</button>
+            </div>
+
+            <div id="statusClassInfo" style="margin-bottom: var(--space-16); padding: var(--space-12); background-color: #f9f9f9; border-radius: var(--radius-base);">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div class="form-group">
+                <label for="implementationType">Implementation Type:</label>
+                <select id="implementationType" onchange="handleImplementationChange()">
+                    <option value="">-- Select Type --</option>
+                    <option value="conducted-f2f">Conducted (Face-to-Face)</option>
+                    <option value="conducted-online">Conducted (Online)</option>
+                    <option value="to-be-replaced">To Be Replaced</option>
+                </select>
+            </div>
+
+            <div id="replacementOptions" style="display: none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="replacementDate">Replacement Date:</label>
+                        <input type="date" id="replacementDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="replacementTime">Replacement Time:</label>
+                        <input type="time" id="replacementTime">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="confirmStatusUpdate()">Confirm</button>
+                <button class="btn btn-secondary" onclick="closeModal('classStatusModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Student List Modal -->
+    <div id="uploadStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Student List</h2>
+                <button class="modal-close" onclick="closeModal('uploadStudentModal')">&times;</button>
+            </div>
+
+            <p>Upload an Excel or Word document containing student names.</p>
+
+            <div class="form-group">
+                <label for="studentFile">Select File (Excel/Word):</label>
+                <input type="file" id="studentFile" accept=".xlsx,.xls,.docx,.doc">
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="uploadStudentList()">Upload &amp; Process</button>
+                <button class="btn btn-secondary" onclick="closeModal('uploadStudentModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Days of week
+        const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        // Data Storage
+        let appData = {
+            classes: [],
+            classInstances: [],
+            attendance: {},
+            students: {},
+            settings: {
+                email: '',
+                googleDriveFolder: ''
+            }
+        };
+
+        let currentStatusClassId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            setupTabNavigation();
+            renderDaysSelector();
+            renderSchedule();
+            renderDashboard();
+            populateAttendanceDropdown();
+        });
+
+        // Tab Navigation
+        function setupTabNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    openTab(tabName, this);
+                });
+            });
+        }
+
+        function openTab(tabName, button) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            button.classList.add('active');
+        }
+
+        // Days Selector
+        function renderDaysSelector() {
+            const selector = document.getElementById('daysSelector');
+            selector.innerHTML = '';
+            DAYS.forEach(day => {
+                const label = document.createElement('label');
+                label.className = 'day-checkbox';
+                label.innerHTML = '<input type="checkbox" value="' + day + '" class="day-select" onchange="updateDaySelection()">' + day;
+                selector.appendChild(label);
+            });
+        }
+
+        function updateDaySelection() {
+            const checkboxes = document.querySelectorAll('.day-select:checked');
+            if (checkboxes.length > 2) {
+                checkboxes[checkboxes.length - 1].checked = false;
+                alert('Maximum 2 days allowed');
+                return;
+            }
+
+            document.querySelectorAll('.day-checkbox').forEach((label, idx) => {
+                if (document.querySelectorAll('.day-select')[idx].checked) {
+                    label.classList.add('selected');
+                } else {
+                    label.classList.remove('selected');
+                }
+            });
+        }
+
+        // Modal Functions
+        function openAddClassModal() {
+            document.getElementById('addClassModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Save Class
+        function saveClass() {
+            const courseCode = document.getElementById('courseCode').value;
+            const courseName = document.getElementById('courseName').value;
+            const className = document.getElementById('className').value;
+            const venue = document.getElementById('classVenue').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+
+            const selectedDays = Array.from(document.querySelectorAll('.day-select:checked')).map(cb => cb.value);
+
+            if (!courseCode || !courseName || !className || !venue || selectedDays.length === 0 || !startTime || !endTime) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const classId = 'class_' + Date.now();
+            const semesterHours = parseInt(document.getElementById('semesterHours').value) || 0;
+            const newClass = {
+                id: classId,
+                courseCode: courseCode,
+                courseName: courseName,
+                className: className,
+                venue: venue,
+                daysOfWeek: selectedDays,
+                startTime: startTime,
+                endTime: endTime,
+                semesterHours: semesterHours,
+                createdAt: new Date().toISOString()
+            };
+
+            appData.classes.push(newClass);
+
+            // Create class instances for each day
+            generateClassInstances(newClass);
+
+            appData.students[classId] = {};
+            saveData();
+            renderSchedule();
+            renderDashboard();
+            populateAttendanceDropdown();
+            closeModal('addClassModal');
+            clearClassForm();
+            alert('Class added successfully!');
+        }
+
+        function generateClassInstances(classObj) {
+            classObj.daysOfWeek.forEach(day => {
+                const instanceId = classObj.id + '_' + day;
+                appData.classInstances.push({
+                    id: instanceId,
+                    classId: classObj.id,
+                    courseCode: classObj.courseCode,
+                    courseName: classObj.courseName,
+                    className: classObj.className,
+                    venue: classObj.venue,
+                    dayOfWeek: day,
+                    startTime: classObj.startTime,
+                    endTime: classObj.endTime,
+                    implementationType: 'pending',
+                    replacedBy: null,
+                    replacementOf: null,
+                    createdAt: new Date().toISOString()
+                });
+            });
+        }
+
+        function renderDashboard() {
+            const dashboardContent = document.getElementById('dashboardContent');
+            const courseOverview = document.getElementById('courseOverview');
+
+            // Group by course
+            const courseMap = {};
+            appData.classes.forEach(cls => {
+                if (!courseMap[cls.id]) {
+                    courseMap[cls.id] = {
+                        code: cls.courseCode,
+                        name: cls.courseName,
+                        semesterHours: cls.semesterHours,
+                        totalInstances: cls.daysOfWeek.length,
+                        instances: []
+                    };
+                }
+                courseMap[cls.id].instances = appData.classInstances.filter(i => i.classId === cls.id);
+            });
+
+            let dashboardHtml = '';
+            let overviewHtml = '';
+            let totalClasses = 0;
+            let completedClasses = 0;
+            let totalSemesterHours = 0;
+
+            Object.keys(courseMap).forEach(classId => {
+                const course = courseMap[classId];
+                const completed = course.instances.filter(i => i.implementationType && i.implementationType !== 'pending' && i.implementationType !== 'to-be-replaced').length;
+                const percent = course.totalInstances > 0 ? Math.round((completed / course.totalInstances) * 100) : 0;
+                const hoursPerClass = course.semesterHours > 0 ? (course.semesterHours / course.totalInstances).toFixed(1) : 0;
+                const completedHours = (completed * hoursPerClass).toFixed(1);
+
+                totalClasses += course.totalInstances;
+                completedClasses += completed;
+                totalSemesterHours += course.semesterHours;
+
+                dashboardHtml += '<div class="progress-card"><strong>' + course.code + ' - ' + course.name + '</strong><br><small>Total Hours: ' + course.semesterHours + ' | Per Class: ' + hoursPerClass + 'h</small><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ' + percent + '%"><span>' + percent + '%</span></div></div><small>' + completed + ' of ' + course.totalInstances + ' classes completed | ' + completedHours + ' of ' + course.semesterHours + ' hours</small></div>';
+
+                overviewHtml += '<div style="padding: var(--space-12); border-bottom: 1px solid var(--color-border);"><strong>' + course.code + '</strong><br>Classes: ' + completed + '/' + course.totalInstances + '<br>Hours: ' + completedHours + '/' + course.semesterHours + '</div>';
+            });
+
+            const overallPercent = totalClasses > 0 ? Math.round((completedClasses / totalClasses) * 100) : 0;
+
+            dashboardHtml = '<div class="progress-card" style="background: linear-gradient(135deg, rgba(45, 154, 142, 0.1), rgba(32, 128, 145, 0.1));"><h3 style="margin: 0 0 var(--space-12) 0;">Overall Progress</h3><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ' + overallPercent + '%; background: linear-gradient(90deg, var(--color-success), var(--color-primary));"><span>' + overallPercent + '%</span></div></div><small>Classes Completed: ' + completedClasses + '/' + totalClasses + ' | Hours Delivered: ' + Math.round(totalSemesterHours * (overallPercent / 100)) + '/' + totalSemesterHours + ' hours</small></div>' + dashboardHtml;
+
+            dashboardContent.innerHTML = dashboardHtml || '<p>No courses scheduled yet.</p>';
+            courseOverview.innerHTML = overviewHtml || '<p>No courses scheduled yet.</p>';
+
+            // Render calendar
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const calendarView = document.getElementById('calendarView');
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            let calendarHtml = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-12);">';
+
+            // Show current and next 3 months
+            for (let m = 0; m < 4; m++) {
+                const monthDate = new Date(currentYear, currentMonth + m, 1);
+                const monthName = monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+                const startDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1).getDay();
+
+                calendarHtml += '<div style="background: #fafafa; padding: var(--space-12); border-radius: var(--radius-base);"><strong style="font-size: 12px;">' + monthName + '</strong>';
+                calendarHtml += '<div class="calendar-header"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>';
+                calendarHtml += '<div class="calendar-grid">';
+
+                // Empty cells for days before month starts
+                for (let i = 0; i < startDay; i++) {
+                    calendarHtml += '<div class="calendar-day other-month"></div>';
+                }
+
+                // Days of month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const fullDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+                    const dayOfWeek = fullDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    const classesOnDay = appData.classInstances.filter(i => i.dayOfWeek === dayOfWeek);
+
+                    let dotClass = '';
+                    if (classesOnDay.some(c => c.implementationType === 'conducted-f2f' || c.implementationType === 'conducted-online')) {
+                        dotClass = 'success';
+                    } else if (classesOnDay.some(c => c.implementationType === 'to-be-replaced')) {
+                        dotClass = 'warning';
+                    } else if (classesOnDay.length > 0) {
+                        dotClass = 'info';
+                    }
+
+                    calendarHtml += '<div class="calendar-day"><span>' + day + '</span>' + (dotClass ? '<span class="calendar-dot ' + dotClass + '"></span>' : '') + '</div>';
+                }
+
+                calendarHtml += '</div></div>';
+            }
+
+            calendarHtml += '</div>';
+            calendarView.innerHTML = calendarHtml;
+        }
+
+        function clearClassForm() {
+            document.getElementById('courseCode').value = '';
+            document.getElementById('courseName').value = '';
+            document.getElementById('className').value = '';
+            document.getElementById('classVenue').value = '';
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+            document.getElementById('semesterHours').value = '';
+            document.querySelectorAll('.day-select').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.day-checkbox').forEach(label => label.classList.remove('selected'));
+        }
+
+        // Schedule Functions
+        function renderSchedule() {
+            const table = document.getElementById('scheduleTable');
+            
+            if (appData.classInstances.length === 0) {
+                table.innerHTML = '<p>No classes scheduled yet.</p>';
+                return;
+            }
+
+            let html = '<div class="table-container"><table><thead><tr><th>Course Code - Class</th><th>Day</th><th>Time</th><th>Venue</th><th>Implementation</th><th>Actions</th></tr></thead><tbody>';
+
+            appData.classInstances.forEach(instance => {
+                const typeBadge = instance.implementationType === 'conducted-f2f' ? 'badge-success' : 
+                                 instance.implementationType === 'conducted-online' ? 'badge-success' :
+                                 instance.implementationType === 'to-be-replaced' ? 'badge-warning' : 'badge-error';
+                const typeText = instance.implementationType === 'conducted-f2f' ? 'F2F' :
+                                instance.implementationType === 'conducted-online' ? 'Online' :
+                                instance.implementationType === 'to-be-replaced' ? 'To Replace' : 'Pending';
+
+                html += '<tr><td><strong>' + instance.courseCode + '</strong> - ' + instance.className + '</td><td>' + instance.dayOfWeek + '</td><td>' + instance.startTime + ' - ' + instance.endTime + '</td><td>' + instance.venue + '</td><td><span class="badge ' + typeBadge + '">' + typeText + '</span></td><td><button class="btn btn-small btn-primary" onclick="openStatusModal(\'' + instance.id + '\')">Update</button><button class="btn btn-small btn-danger" onclick="deleteClassInstance(\'' + instance.id + '\')">Delete</button></td></tr>';
+            });
+
+            html += '</tbody></table></div>';
+
+            table.innerHTML = html;
+        }
+
+        function openStatusModal(instanceId) {
+            currentStatusClassId = instanceId;
+            const instance = appData.classInstances.find(i => i.id === instanceId);
+
+            document.getElementById('statusClassInfo').innerHTML = '<strong>' + instance.courseCode + ' - ' + instance.className + '</strong><br>' + instance.dayOfWeek + ', ' + instance.startTime + ' - ' + instance.endTime + '<br>' + instance.venue;
+
+            document.getElementById('implementationType').value = instance.implementationType || '';
+            document.getElementById('replacementOptions').style.display = 'none';
+            document.getElementById('classStatusModal').classList.add('active');
+        }
+
+        function handleImplementationChange() {
+            const type = document.getElementById('implementationType').value;
+            document.getElementById('replacementOptions').style.display = type === 'to-be-replaced' ? 'block' : 'none';
+        }
+
+        function confirmStatusUpdate() {
+            const type = document.getElementById('implementationType').value;
+            if (!type) {
+                alert('Please select an implementation type');
+                return;
+            }
+
+            const instance = appData.classInstances.find(i => i.id === currentStatusClassId);
+            instance.implementationType = type;
+
+            if (type === 'to-be-replaced') {
+                const replacementDate = document.getElementById('replacementDate').value;
+                const replacementTime = document.getElementById('replacementTime').value;
+
+                if (!replacementDate || !replacementTime) {
+                    alert('Please select replacement date and time');
+                    return;
+                }
+
+                // Create replacement class instance
+                const replacementInstanceId = currentStatusClassId + '_replacement_' + Date.now();
+                const replacementInstance = {
+                    id: replacementInstanceId,
+                    classId: instance.classId,
+                    courseCode: instance.courseCode,
+                    courseName: instance.courseName,
+                    className: instance.className,
+                    venue: instance.venue,
+                    dayOfWeek: new Date(replacementDate).toLocaleDateString('en-US', { weekday: 'long' }),
+                    startTime: replacementTime,
+                    endTime: instance.endTime,
+                    implementationType: 'pending',
+                    replacedBy: null,
+                    replacementOf: currentStatusClassId,
+                    createdAt: new Date().toISOString()
+                };
+
+                appData.classInstances.push(replacementInstance);
+                instance.replacedBy = replacementInstanceId;
+            }
+
+            saveData();
+            renderSchedule();
+            renderDashboard();
+            closeModal('classStatusModal');
+            alert('Implementation updated successfully!');
+        }
+
+        function deleteClassInstance(instanceId) {
+            if (confirm('Are you sure you want to delete this class instance?')) {
+                appData.classInstances = appData.classInstances.filter(i => i.id !== instanceId);
+                saveData();
+                renderSchedule();
+                renderDashboard();
+            }
+        }
+
+        // Attendance Functions
+        function populateAttendanceDropdown() {
+            const select = document.getElementById('attendanceClass');
+            select.innerHTML = '<option value="">-- Select a Class --</option>';
+            appData.classInstances.forEach((instance, idx) => {
+                select.innerHTML += '<option value="' + idx + '">' + instance.courseCode + ' - ' + instance.className + ' (' + instance.dayOfWeek + ')</option>';
+            });
+        }
+
+        function loadStudentsForAttendance() {
+            const instanceIdx = document.getElementById('attendanceClass').value;
+            if (!instanceIdx) {
+                document.getElementById('attendanceContent').innerHTML = '';
+                return;
+            }
+
+            const instance = appData.classInstances[instanceIdx];
+            const classId = instance.classId;
+            const students = appData.students[classId] || {};
+
+            let html = '<p><strong>Mark absences for:</strong> ' + instance.courseCode + ' - ' + instance.className + '</p>';
+            html += '<div style="margin-top: var(--space-16);">';
+
+            if (Object.keys(students).length === 0) {
+                html += '<p style="color: var(--color-text-secondary);">No students yet. Upload a student list first.</p>';
+            } else {
+                Object.keys(students).forEach(studentName => {
+                    html += '<div style="padding: var(--space-12); border: 1px solid var(--color-border); margin-bottom: var(--space-8); border-radius: var(--radius-base);"><input type="checkbox" id="absent_' + studentName + '" onchange="toggleAbsence(\'' + classId + '\', \'' + studentName + '\')"><label for="absent_' + studentName + '" style="margin-left: var(--space-8);">' + studentName + '</label></div>';
+                });
+            }
+
+            html += '</div>';
+            document.getElementById('attendanceContent').innerHTML = html;
+        }
+
+        function toggleAbsence(classId, studentName) {
+            if (!appData.attendance[classId]) {
+                appData.attendance[classId] = { absent: [], reasons: {} };
+            }
+
+            const isAbsent = document.getElementById('absent_' + studentName).checked;
+            if (isAbsent && !appData.attendance[classId].absent.includes(studentName)) {
+                appData.attendance[classId].absent.push(studentName);
+            } else if (!isAbsent) {
+                appData.attendance[classId].absent = appData.attendance[classId].absent.filter(n => n !== studentName);
+            }
+
+            saveData();
+        }
+
+        // File Upload
+        function openUploadStudentModal() {
+            document.getElementById('uploadStudentModal').classList.add('active');
+        }
+
+        function uploadStudentList() {
+            alert('Student list upload feature coming soon. For now, you can manually add students.');
+            closeModal('uploadStudentModal');
+        }
+
+        // Report Functions
+        function generatePDFReport() {
+            alert('PDF report generation coming soon!');
+        }
+
+        function exportToGoogleDrive() {
+            alert('Google Drive sync feature coming soon!');
+        }
+
+        // Settings
+        function saveSettings() {
+            appData.settings.email = document.getElementById('emailNotifications').value;
+            appData.settings.googleDriveFolder = document.getElementById('googleDriveFolder').value;
+            saveData();
+            alert('Settings saved!');
+        }
+
+        function downloadDataBackup() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'class-tracker-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+        }
+
+        // Data Persistence
+        function saveData() {
+            localStorage.setItem('classTrackerData', JSON.stringify(appData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('classTrackerData');
+            if (saved) {
+                appData = JSON.parse(saved);
+            }
+        }
+    </script>
+</body>
+</html>
